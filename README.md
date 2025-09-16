@@ -24,3 +24,26 @@ running a build you must provide the model file yourself so it can be referenced
 
 With these steps complete the application will load the TensorFlow Lite model from the provided
 location at startup and perform detections without bundling the asset in the APK.
+
+## Runtime configuration example
+
+`DetectionEngine` accepts a runtime `ModelConfig` so you can point the interpreter at any
+compatible `.tflite` file your application downloads or provisions on-device. Below is a minimal
+example showing how to load a model path that was retrieved from shared preferences and execute
+inference:
+
+```kotlin
+val engine = DetectionEngine()
+val config = DetectionEngine.ModelConfig(
+    modelPath = preferences.getString("model_path", "") ?: error("Missing model path"),
+    labelPath = preferences.getString("label_path", null),
+    confidenceThreshold = 0.6f,
+    maxResults = 5
+)
+
+engine.loadModel(config)
+val results = engine.detect(bitmap)
+```
+
+When a different model becomes available you can call `loadModel` again with the new path and the
+engine will swap interpreters on your behalf without requiring an application restart.
